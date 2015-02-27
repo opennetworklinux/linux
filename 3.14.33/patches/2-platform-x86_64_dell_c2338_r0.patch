@@ -1,0 +1,134 @@
+--- linux-3.14.33.release/drivers/platform/x86/Kconfig	2015-02-10 22:55:02.000000000 -0800
++++ linux-3.14.33.manual/drivers/platform/x86/Kconfig	2015-02-27 11:37:34.296892706 -0800
+@@ -827,4 +827,10 @@ config INTEL_BAYTRAIL_MBI
+ 	  Interface. This is a requirement for systems that need to configure
+ 	  the PUNIT for power management features such as RAPL.
+
++config X86_64_DELL_S4000_C2338_R0
++        tristate "Platform Driver for the DELL S4000"
++        ---help---
++        Support the Dell S4000 Platform.
++
++
+ endif # X86_PLATFORM_DEVICES
+
+--- linux-3.14.33.release/drivers/platform/x86/Makefile	2015-02-10 22:55:02.000000000 -0800
++++ linux-3.14.33.manual/drivers/platform/x86/Makefile	2015-02-27 11:48:05.572804477 -0800
+@@ -56,3 +56,4 @@ obj-$(CONFIG_INTEL_SMARTCONNECT)	+= inte
+
+ obj-$(CONFIG_PVPANIC)           += pvpanic.o
+ obj-$(CONFIG_INTEL_BAYTRAIL_MBI)	+= intel_baytrail.o
++obj-$(CONFIG_X86_64_DELL_S4000_C2338_R0) += x86_64_dell_s4000_c2338_r0.o
+
+--- linux-3.14.33.release/drivers/platform/x86/x86_64_dell_s4000_c2338_r0.c	1969-12-31 16:00:00.000000000 -0800
++++ linux-3.14.33.manual/drivers/platform/x86/x86_64_dell_s4000_c2338_r0.c	2015-02-27 11:37:01.336687752 -0800
+@@ -0,0 +1,109 @@
++/**
++ * Dell S4000-ON Platform Support.
++ */
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/i2c.h>
++#include <linux/gpio.h>
++
++#include <linux/i2c-mux-gpio.h>
++#include <linux/platform_device.h>
++#include <linux/dmi.h>
++
++
++static const struct dmi_system_id __device_table[] __initconst = {
++    {
++        .ident = "Dell S4000-ON",
++        .matches = {
++            DMI_MATCH(DMI_SYS_VENDOR, "Dell Inc"),
++            DMI_MATCH(DMI_PRODUCT_NAME, "S4000 54-port 10G/40G"),
++        },
++    },
++    { }
++};
++MODULE_DEVICE_TABLE(dmi, __dell_device_table);
++
++
++
++/**
++ * I2C Bus Information
++ */
++static struct i2c_board_info __i2c_0_board_info[] = {
++    /* PCA9547 Mux */
++    { I2C_BOARD_INFO("pca9547", 0x70) },
++};
++
++static struct i2c_board_info __i2c_2_board_info[] = {
++    /* Temperature Sensors */
++    { I2C_BOARD_INFO("lm75",    0x4c) },
++    { I2C_BOARD_INFO("lm75",    0x4d) },
++    { I2C_BOARD_INFO("lm75",    0x4e) },
++    /* Hot Swap Controllers */
++    { I2C_BOARD_INFO("ltc4215", 0x42) },
++    { I2C_BOARD_INFO("ltc4215", 0x40) },
++    /* Fan Controllers */
++    { I2C_BOARD_INFO("max6620", 0x29) },
++    { I2C_BOARD_INFO("max6620", 0x2A) },
++    /* Fan FRU eeproms */
++    { I2C_BOARD_INFO("24c02",   0x51) },
++    { I2C_BOARD_INFO("24c02",   0x52) },
++    { I2C_BOARD_INFO("24c02",   0x53) },
++};
++
++static int
++register_i2c_bus(int bus, struct i2c_board_info* info, int count)
++{
++    int i;
++    struct i2c_adapter * i2ca = i2c_get_adapter(bus);
++
++    if(!i2ca) {
++        pr_err("%s: failed to get adapter %d",
++               __FUNCTION__, bus);
++        return -ENODEV;
++    }
++
++    for(i = 0; i < count; i++) {
++        if(i2c_new_device(i2ca, info+i) == NULL) {
++            pr_err("%s: i2c_new_device for bus %d:0x%x failed.",
++                   __FUNCTION__, bus, info[i].addr);
++            return -ENODEV;
++        }
++    }
++    return 0;
++}
++
++static int __init x86_64_dell_s4000_c2338_r0_init(void)
++{
++    int rv = 0;
++
++    if (!dmi_check_system(__device_table)) {
++        return -ENODEV;
++    }
++
++    pr_info("Platform: DELL S4000");
++
++    if( (rv = register_i2c_bus(0, __i2c_0_board_info, ARRAY_SIZE(__i2c_0_board_info))) < 0) {
++        return rv;
++    }
++
++    if( (rv = register_i2c_bus(2, __i2c_2_board_info, ARRAY_SIZE(__i2c_2_board_info))) < 0) {
++        return rv;
++    }
++
++    return 0;
++
++}
++
++static void __exit x86_64_dell_s4000_c2338_r0_cleanup(void)
++{
++}
++
++module_init(x86_64_dell_s4000_c2338_r0_init);
++module_exit(x86_64_dell_s4000_c2338_r0_cleanup);
++
++MODULE_AUTHOR("Big Switch Networks (support@bigswitch.com)");
++MODULE_VERSION("1.0");
++MODULE_DESCRIPTION("Dell S4000 Platform");
++MODULE_LICENSE("GPL");
++
