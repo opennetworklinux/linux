@@ -1,0 +1,10 @@
+--- a/init/Kconfig	2015-02-10 22:55:02.000000000 -0800
++++ b/init/Kconfig	2015-03-08 17:56:53.556956124 -0700
+@@ -1276,7 +1276,6 @@ config HAVE_PCSPKR_PLATFORM
+ menuconfig EXPERT
+ 	bool "Configure standard kernel features (expert users)"
+ 	# Unhide debug options, to make the on-by-default options visible
+-	select DEBUG_KERNEL
+ 	help
+ 	  This option allows certain base kernel options and settings
+           to be disabled or tweaked. This is for specialized
