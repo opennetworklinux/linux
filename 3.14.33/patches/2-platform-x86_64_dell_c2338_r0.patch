@@ -22,7 +22,7 @@
 
 --- linux-3.14.33.release/drivers/platform/x86/x86_64_dell_s4000_c2338_r0.c	1969-12-31 16:00:00.000000000 -0800
 +++ linux-3.14.33.manual/drivers/platform/x86/x86_64_dell_s4000_c2338_r0.c	2015-02-27 11:37:01.336687752 -0800
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,111 @@
 +/**
 + * Dell S4000-ON Platform Support.
 + */
@@ -50,6 +50,8 @@
 +MODULE_DEVICE_TABLE(dmi, __dell_device_table);
 +
 +
++int disabled;
++module_param(disabled, int, 0);
 +
 +/**
 + * I2C Bus Information
@@ -102,7 +104,7 @@
 +{
 +    int rv = 0;
 +
-+    if (!dmi_check_system(__device_table)) {
++    if (disabled || !dmi_check_system(__device_table)) {
 +        return -ENODEV;
 +    }
 +
