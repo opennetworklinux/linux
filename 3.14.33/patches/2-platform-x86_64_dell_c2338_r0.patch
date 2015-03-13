@@ -63,9 +63,9 @@
 +
 +static struct i2c_board_info __i2c_2_board_info[] = {
 +    /* Temperature Sensors */
-+    { I2C_BOARD_INFO("lm75",    0x4c) },
-+    { I2C_BOARD_INFO("lm75",    0x4d) },
-+    { I2C_BOARD_INFO("lm75",    0x4e) },
++    { I2C_BOARD_INFO("tmp75",    0x4c) },
++    { I2C_BOARD_INFO("tmp75",    0x4d) },
++    { I2C_BOARD_INFO("tmp75",    0x4e) },
 +    /* Hot Swap Controllers */
 +    { I2C_BOARD_INFO("ltc4215", 0x42) },
 +    { I2C_BOARD_INFO("ltc4215", 0x40) },
