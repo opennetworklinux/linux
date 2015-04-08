@@ -72,11 +72,16 @@ endif
 ############################################################
 ############################################################
 
-K_VERSION := 3.$(K_PATCH_LEVEL).$(K_SUB_LEVEL)
+K_VERSION := 3.$(K_PATCH_LEVEL).$(K_SUB_LEVEL)$(K_SUFFIX)
 K_NAME := linux-$(K_VERSION)
-K_ARCHIVE_NAME := $(K_NAME).tar.xz
+ifndef K_ARCHIVE_EXT
+K_ARCHIVE_EXT := tar.xz
+endif
+K_ARCHIVE_NAME := $(K_NAME).$(K_ARCHIVE_EXT)
 K_ARCHIVE_PATH := $(ONLL)/archives/$(K_ARCHIVE_NAME)
+ifndef K_ARCHIVE_URL
 K_ARCHIVE_URL := https://www.kernel.org/pub/linux/kernel/v3.x/$(K_ARCHIVE_NAME)
+endif
 K_SOURCE_DIR := $(K_TARGET_DIR)/$(K_NAME)
 K_MBUILD_DIR := $(K_SOURCE_DIR)-mbuild
 
