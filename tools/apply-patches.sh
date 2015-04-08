@@ -28,9 +28,23 @@ set -e
 KERNDIR=$1
 PATCHDIR=$2
 
-for p in `ls ${PATCHDIR}/*.patch | sort`; do
-    echo "Applying ${p}..."
-    patch --batch -p 1 -d ${KERNDIR} < ${p}
-done
+if [ -f "${PATCHDIR}/series" ]; then
+    #
+    # The series file contains the patch order.
+    #
+    for p in `cat ${PATCHDIR}/series`; do
+        echo "Appying ${p}..."
+        patch --batch -p 1 -d ${KERNDIR} < "${PATCHDIR}/${p}"
+    done
+else
+    #
+    # Patch order is implied by filenames.
+    #
+    for p in `ls ${PATCHDIR}/*.patch | sort`; do
+        echo "Applying ${p}..."
+        patch --batch -p 1 -d ${KERNDIR} < ${p}
+    done
+fi
+
 
 
