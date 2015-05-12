@@ -25,6 +25,8 @@
 THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 include ../../../init.mk
 
+export ARCH := x86_64
+
 ifndef K_TARGET_DIR
 K_TARGET_DIR := $(THIS_DIR)
 endif
