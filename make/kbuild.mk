@@ -23,6 +23,10 @@
 #
 ############################################################
 
+ifndef ARCH
+$(error $$ARCH must be set)
+endif
+
 #
 # The kernel patchlevel.
 #
