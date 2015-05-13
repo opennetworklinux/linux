@@ -32,9 +32,9 @@ endif
 include ../../kconfig.mk
 K_CONFIG := powerpc-e500v-all.config
 K_BUILD_TARGET := uImage
-K_COPY_SRC := arch/powerpc/boot/uImage
+K_COPY_SRC := vmlinux.bin.gz
 ifndef K_COPY_DST
-K_COPY_DST := kernel-3.2-deb7-powerpc-e500-all
+K_COPY_DST := kernel-3.2-deb7-powerpc-e500-all.bin.gz
 endif
 
 export ARCH=powerpc
