@@ -141,7 +141,8 @@ endif
 endif
 
 
-MODSYNCLIST := .config Module.symvers Makefile include scripts arch/x86/include arch/x86/Makefile
+MODSYNCLIST := .config Module.symvers Makefile include scripts arch/x86/include arch/x86/Makefile arch/powerpc/include arch/powerpc/Makefile arch/powerpc/lib
+
 mbuild: build
 	rm -rf $(K_MBUILD_DIR)
 	mkdir -p $(K_MBUILD_DIR)
