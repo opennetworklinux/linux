@@ -38,6 +38,7 @@ K_COPY_DST := kernel-3.2-deb7-powerpc-e500-all
 endif
 
 export ARCH=powerpc
+DTS_LIST := bcm98548xmc quanta_lb9 quanta_ly2
 
 include $(ONLL_MAKE)/kbuild.mk
 
