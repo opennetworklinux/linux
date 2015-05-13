@@ -88,6 +88,7 @@ K_ARCHIVE_URL := https://www.kernel.org/pub/linux/kernel/v3.x/$(K_ARCHIVE_NAME)
 endif
 K_SOURCE_DIR := $(K_TARGET_DIR)/$(K_NAME)
 K_MBUILD_DIR := $(K_SOURCE_DIR)-mbuild
+K_DTBS_DIR := $(K_SOURCE_DIR)-dtbs
 
 #
 # The kernel source archive. Download if not present.
@@ -146,9 +147,12 @@ mbuild: build
 	mkdir -p $(K_MBUILD_DIR)
 	$(foreach f,$(MODSYNCLIST),$(ONLL_TOOLS)/sync.sh $(K_SOURCE_DIR) $(f) $(K_MBUILD_DIR);)
 
-
-
-all: modheaders
+dtbs: mbuild
+ifdef DTS_LIST
+	rm -rf $(K_DTBS_DIR)
+	mkdir -p $(K_DTBS_DIR)
+	$(foreach name,$(DTS_LIST),$(K_SOURCE_DIR)/scripts/dtc/dtc -I dts -O dtb -o $(K_DTBS_DIR)/$(name).dtb $(K_SOURCE_DIR)/arch/$(ARCH)/boot/dts/$(name).dts; )
+endif
 
 #
 # This target can be used to manage the configuration file.
@@ -157,8 +161,4 @@ configure: setup
 	$(K_MAKE) menuconfig
 	cp $(K_SOURCE_DIR)/.config $(K_CONFIG)
 
-
-.DEFAULT_GOAL := mbuild
-
-
-
+.DEFAULT_GOAL := dtbs
