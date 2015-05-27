@@ -38,7 +38,7 @@ K_COPY_DST := kernel-3.2-deb7-powerpc-e500-all.bin.gz
 endif
 
 export ARCH=powerpc
-DTS_LIST := bcm98548xmc powerpc-quanta-lb9-r0 powerpc-quanta-ly2-r0 powerpc-as4600-54t powerpc-as5610-52x
+DTS_LIST := bcm98548xmc powerpc-quanta-lb9-r0 powerpc-quanta-ly2-r0 powerpc-accton-as4600-54t-r0 powerpc-accton-as5610-52x-r0
 
 include $(ONLL_MAKE)/kbuild.mk
 

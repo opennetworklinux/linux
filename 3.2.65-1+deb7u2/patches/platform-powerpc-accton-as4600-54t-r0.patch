@@ -1,6 +1,6 @@
-diff -rupN a/arch/powerpc/boot/dts/powerpc-as4600-54t.dts b/arch/powerpc/boot/dts/powerpc-as4600-54t.dts
---- a/arch/powerpc/boot/dts/powerpc-as4600-54t.dts	1969-12-31 16:00:00.000000000 -0800
-+++ b/arch/powerpc/boot/dts/powerpc-as4600-54t.dts	2015-05-26 18:24:31.872428138 -0700
+diff -rupN a/arch/powerpc/boot/dts/powerpc-accton-as4600-54t-r0.dts b/arch/powerpc/boot/dts/powerpc-accton-as4600-54t-r0.dts
+--- a/arch/powerpc/boot/dts/powerpc-accton-as4600-54t-r0.dts	1969-12-31 16:00:00.000000000 -0800
++++ b/arch/powerpc/boot/dts/powerpc-accton-as4600-54t-r0.dts	2015-05-26 18:24:31.872428138 -0700
 @@ -0,0 +1,479 @@
 +/*
 + * P2020 RDB Device Tree Source
