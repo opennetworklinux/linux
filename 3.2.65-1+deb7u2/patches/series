@@ -76,6 +76,8 @@ platform-powerpc-accton-as4600-54t-r0.patch
 platform-powerpc-accton-as5610-52x-r0.patch
 platform-powerpc-quanta-lb9-r0.patch
 platform-powerpc-quanta-ly2-r0.patch
+platform-powerpc-dell-s4810-p2020-r0.patch
+platform-powerpc-dni-7448-r0.patch
 network-increase-max-igmp-groups.patch
 network-bridge-rearrange-fdb-notifications.patch
 network-bridge-fix-fdb-update-notify.patch
