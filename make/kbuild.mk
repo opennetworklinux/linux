@@ -133,7 +133,7 @@ K_MAKE    := $(MAKE) -C $(K_SOURCE_DIR)
 # Build the kernel.
 #
 build: setup
-	$(K_MAKE) $(K_BUILD_TARGET)
+	+$(K_MAKE) $(K_BUILD_TARGET)
 ifdef K_COPY_SRC
 ifdef K_COPY_DST
 	cp $(K_SOURCE_DIR)/$(K_COPY_SRC) $(K_TARGET_DIR)/$(K_COPY_DST)
