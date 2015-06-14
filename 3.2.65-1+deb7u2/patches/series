@@ -53,6 +53,7 @@ driver-hwmon-pmbus-dni_dps460.patch
 driver-support-intel-igb-bcm54616-phy.patch
 driver-support-intel-igb-bcm5461s-phy.patch
 driver-support-sff-8436-eeprom.patch
+driver-s6000-i2c-gpio-mux.patch
 platform-powerpc-85xx-Makefile.patch
 platform-accton-as4600_54t.patch
 platform-accton-as5610_52x.patch
