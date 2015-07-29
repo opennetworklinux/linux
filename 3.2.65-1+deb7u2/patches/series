@@ -234,4 +234,6 @@ network-core-proto-down.patch
 network-bonding-clag-proto-down.patch
 network-bridge-disable-multiple-sub-intfs-on-same-port.patch
 network-virtio-proto-down.patch
+driver-hwmon-cpr-4011-4mxx.patch
+platform-accton-as5712_54x-device-drivers.patch
 
