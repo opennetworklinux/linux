@@ -33,6 +33,10 @@ if [ -f "${PATCHDIR}/series" ]; then
     # The series file contains the patch order.
     #
     for p in `cat ${PATCHDIR}/series`; do
+        p=$(echo $p | cut -d'#' -f1)
+        if [ -z $p ]; then
+            continue
+        fi
         echo "Appying ${p}..."
         patch --batch -p 1 -d ${KERNDIR} < "${PATCHDIR}/${p}"
     done
