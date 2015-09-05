@@ -55,7 +55,7 @@ new file mode 100644
 index 0000000..9c7cac7
 --- /dev/null
 +++ b/drivers/hwmon/accton_as6712_32x_fan.c
-@@ -0,0 +1,425 @@
+@@ -0,0 +1,430 @@
 +/*
 + * A hwmon driver for the Accton as6712 32x fan contrl
 + *
@@ -440,6 +440,11 @@ index 0000000..9c7cac7
 +{
 +    int ret;
 +    
++    extern int platform_accton_as6712_32x(void);
++    if(!platform_accton_as6712_32x()) { 
++      return -ENODEV;
++    }
++
 +    ret = platform_driver_register(&accton_as6712_32x_fan_driver);
 +    if (ret < 0) {
 +        goto exit;
@@ -486,7 +491,7 @@ new file mode 100644
 index 0000000..ef9fadf
 --- /dev/null
 +++ b/drivers/hwmon/accton_as6712_32x_psu.c
-@@ -0,0 +1,299 @@
+@@ -0,0 +1,304 @@
 +/*
 + * An hwmon driver for accton as6712_32x Power Module
 + *
@@ -772,6 +777,11 @@ index 0000000..ef9fadf
 +
 +static int __init as6712_32x_psu_init(void)
 +{
++    extern int platform_accton_as6712_32x(void);
++    if(!platform_accton_as6712_32x()) { 
++      return -ENODEV;
++    }
++
 +    return i2c_add_driver(&as6712_32x_psu_driver);
 +}
 +
@@ -823,7 +833,7 @@ new file mode 100644
 index 0000000..2ec0a59
 --- /dev/null
 +++ b/drivers/i2c/muxes/i2c-mux-accton_as6712_32x_cpld.c
-@@ -0,0 +1,378 @@
+@@ -0,0 +1,394 @@
 +/*
 + * I2C multiplexer
 + *
@@ -858,6 +868,22 @@ index 0000000..2ec0a59
 +#include <linux/device.h>
 +#include <linux/i2c.h>
 +#include <linux/i2c-mux.h>
++#include <linux/dmi.h>
++
++static struct dmi_system_id as6712_dmi_table[] = {
++    {
++        .ident = "Accton AS6712",
++        .matches = {
++            DMI_MATCH(DMI_SYS_VENDOR, "Accton"),
++            DMI_MATCH(DMI_PRODUCT_NAME, "AS6712"),
++        },
++    }
++};
++
++int platform_accton_as6712_32x(void)
++{
++    dmi_check_system(as6712_dmi_table);
++}
 +
 +#define NUM_OF_CPLD2_CHANS 0x10
 +#define NUM_OF_CPLD3_CHANS 0x10
@@ -1237,7 +1263,7 @@ new file mode 100644
 index 0000000..c1da3bc
 --- /dev/null
 +++ b/drivers/leds/leds-accton_as6712_32x.c
-@@ -0,0 +1,612 @@
+@@ -0,0 +1,617 @@
 +/*
 + * A LED driver for the accton_as6712_32x_led
 + *
@@ -1811,6 +1837,11 @@ index 0000000..c1da3bc
 +{
 +    int ret;
 +
++    extern int platform_accton_as6712_32x(void);
++    if(!platform_accton_as6712_32x()) { 
++      return -ENODEV;
++    }
++
 +    ret = platform_driver_register(&accton_as6712_32x_led_driver);
 +    if (ret < 0) {
 +        goto exit;
@@ -1886,7 +1917,7 @@ new file mode 100644
 index 0000000..8253134
 --- /dev/null
 +++ b/drivers/misc/eeprom/accton_as6712_32x_sfp.c
-@@ -0,0 +1,372 @@
+@@ -0,0 +1,377 @@
 +/*
 + * An hwmon driver for accton as6712_32x sfp
 + *
@@ -2056,6 +2087,11 @@ index 0000000..8253134
 +{
 +    struct as6712_32x_sfp_data *data;
 +    int status;
++
++    extern int platform_accton_as6712_32x(void);
++    if(!platform_accton_as6712_32x()) { 
++      return -ENODEV;
++    }
 +
 +    if (!i2c_check_functionality(client->adapter, /*I2C_FUNC_SMBUS_BYTE_DATA | */I2C_FUNC_SMBUS_WORD_DATA)) {
 +        status = -EIO;

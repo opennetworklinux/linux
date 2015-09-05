@@ -48,7 +48,7 @@ new file mode 100644
 index 0000000..df6c222
 --- /dev/null
 +++ b/drivers/hwmon/accton_as5712_54x_fan.c
-@@ -0,0 +1,437 @@
+@@ -0,0 +1,442 @@
 +/*
 + * A hwmon driver for the Accton as5710 54x fan contrl
 + *
@@ -445,6 +445,11 @@ index 0000000..df6c222
 +{
 +    int ret;
 +
++    extern int platform_accton_as5712_54x(void); 
++    if(!platform_accton_as5712_54x()) {
++        return -ENODEV;
++    }
++
 +    ret = platform_driver_register(&accton_as5712_54x_fan_driver);
 +    if (ret < 0) {
 +        goto exit;
@@ -491,7 +496,7 @@ new file mode 100644
 index 0000000..0890e92
 --- /dev/null
 +++ b/drivers/hwmon/accton_as5712_54x_psu.c
-@@ -0,0 +1,289 @@
+@@ -0,0 +1,293 @@
 +/*
 + * An hwmon driver for accton as5712_54x Power Module
 + *
@@ -766,6 +771,10 @@ index 0000000..0890e92
 +
 +static int __init as5712_54x_psu_init(void)
 +{
++    extern int platform_accton_as5712_54x(void); 
++    if(!platform_accton_as5712_54x()) {
++        return -ENODEV;
++    }
 +    return i2c_add_driver(&as5712_54x_psu_driver);
 +}
 +
@@ -819,7 +828,7 @@ new file mode 100644
 index 0000000..6381db5
 --- /dev/null
 +++ b/drivers/i2c/muxes/i2c-mux-accton_as5712_54x_cpld.c
-@@ -0,0 +1,420 @@
+@@ -0,0 +1,434 @@
 +/*
 + * I2C multiplexer
 + *
@@ -854,6 +863,23 @@ index 0000000..6381db5
 +#include <linux/device.h>
 +#include <linux/i2c.h>
 +#include <linux/i2c-mux.h>
++#include <linux/dmi.h>
++
++static struct dmi_system_id as5712_dmi_table[] = {
++    {
++        .ident = "Accton AS5712",
++        .matches = {
++            DMI_MATCH(DMI_SYS_VENDOR, "Accton"),
++            DMI_MATCH(DMI_PRODUCT_NAME, "AS5712"),
++        },
++    }
++};
++
++int platform_accton_as5712_54x(void)
++{
++    dmi_check_system(as5712_dmi_table);
++}
++
 +
 +#define NUM_OF_CPLD2_CHANS 0x18
 +#define NUM_OF_CPLD3_CHANS 0x1E
@@ -1221,9 +1247,6 @@ index 0000000..6381db5
 +static int __init accton_i2c_cpld_mux_init(void)
 +{
 +    mutex_init(&list_lock);
-+#if 0
-+    memset(mux_adap_map, 0, sizeof(mux_adap_map));
-+#endif
 +    return i2c_add_driver(&accton_i2c_cpld_mux_driver);
 +}
 +
@@ -1275,7 +1298,7 @@ new file mode 100644
 index 0000000..5e346b2
 --- /dev/null
 +++ b/drivers/leds/leds-accton_as5712_54x.c
-@@ -0,0 +1,593 @@
+@@ -0,0 +1,597 @@
 +/*
 + * A LED driver for the accton_as5712_54x_led
 + *
@@ -1830,6 +1853,10 @@ index 0000000..5e346b2
 +{
 +    int ret;
 +
++    extern int platform_accton_as5712_54x(void); 
++    if(!platform_accton_as5712_54x()) {
++        return -ENODEV;
++    }
 +    ret = platform_driver_register(&accton_as5712_54x_led_driver);
 +    if (ret < 0) {
 +        goto exit;
@@ -1905,7 +1932,7 @@ new file mode 100644
 index 0000000..54d885e
 --- /dev/null
 +++ b/drivers/misc/eeprom/accton_as5712_54x_sfp.c
-@@ -0,0 +1,655 @@
+@@ -0,0 +1,660 @@
 +/*
 + * An hwmon driver for accton as5712_54x sfp
 + *
@@ -2192,6 +2219,11 @@ index 0000000..54d885e
 +{
 +    struct as5712_54x_sfp_data *data;
 +    int status;
++
++    extern int platform_accton_as5712_54x(void); 
++    if(!platform_accton_as5712_54x()) {
++        return -ENODEV;
++    }
 +
 +    if (!i2c_check_functionality(client->adapter, I2C_FUNC_SMBUS_BYTE_DATA)) {
 +        status = -EIO;
