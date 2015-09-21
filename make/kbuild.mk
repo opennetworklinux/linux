@@ -105,7 +105,7 @@ $(K_ARCHIVE_PATH):
 $(K_SOURCE_DIR)/Makefile: $(K_ARCHIVE_PATH)
 	cd $(K_TARGET_DIR) && tar kxf $(K_ARCHIVE_PATH)
 	touch -c $(K_SOURCE_DIR)/Makefile
-	$(K_MAKE) mrproper
+	+$(K_MAKE) mrproper
 
 ksource: $(K_SOURCE_DIR)/Makefile
 
@@ -159,7 +159,7 @@ endif
 # This target can be used to manage the configuration file.
 #
 configure: setup
-	$(K_MAKE) menuconfig
+	+$(K_MAKE) menuconfig
 	cp $(K_SOURCE_DIR)/.config $(K_CONFIG)
 
 .DEFAULT_GOAL := dtbs
