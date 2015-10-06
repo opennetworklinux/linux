@@ -445,7 +445,7 @@ index 0000000..df6c222
 +{
 +    int ret;
 +
-+    extern int platform_accton_as5712_54x(void); 
++    extern int platform_accton_as5712_54x(void);
 +    if(!platform_accton_as5712_54x()) {
 +        return -ENODEV;
 +    }
@@ -771,7 +771,7 @@ index 0000000..0890e92
 +
 +static int __init as5712_54x_psu_init(void)
 +{
-+    extern int platform_accton_as5712_54x(void); 
++    extern int platform_accton_as5712_54x(void);
 +    if(!platform_accton_as5712_54x()) {
 +        return -ENODEV;
 +    }
@@ -1853,7 +1853,7 @@ index 0000000..5e346b2
 +{
 +    int ret;
 +
-+    extern int platform_accton_as5712_54x(void); 
++    extern int platform_accton_as5712_54x(void);
 +    if(!platform_accton_as5712_54x()) {
 +        return -ENODEV;
 +    }
@@ -1932,7 +1932,7 @@ new file mode 100644
 index 0000000..54d885e
 --- /dev/null
 +++ b/drivers/misc/eeprom/accton_as5712_54x_sfp.c
-@@ -0,0 +1,660 @@
+@@ -0,0 +1,672 @@
 +/*
 + * An hwmon driver for accton as5712_54x sfp
 + *
@@ -2158,33 +2158,45 @@ index 0000000..54d885e
 +    struct i2c_client *client = to_i2c_client(dev);
 +    struct as5712_54x_sfp_data *data = i2c_get_clientdata(client);
 +    unsigned short cpld_addr = 0;
-+    u8 cpld_reg = 0, cpld_val = 0;
-+	long disable;
-+	int error;
++    u8 cpld_reg = 0, cpld_val = 0, cpld_bit = 0;
++    long disable;
++    int error;
 +
 +    /* Tx disable is not supported for QSFP ports(49-54) */
 +    if (data->port >= 48) {
 +        return -EINVAL;
 +    }
 +
-+	error = kstrtol(buf, 10, &disable);
-+	if (error) {
++    error = kstrtol(buf, 10, &disable);
++    if (error) {
 +        return error;
 +    }
 +
 +    mutex_lock(&data->update_lock);
-+    cpld_addr = (data->port < 24) ? 0x61 : 0x62;
-+    cpld_reg  = 0xC + (data->port%24)/8;
++
++    if(data->port < 24) {
++        cpld_addr = 0x61;
++        cpld_reg = 0xC + data->port / 8;
++        cpld_bit = 1 << (data->port % 8);
++    }
++    else {
++        cpld_addr = 0x62;
++        cpld_reg = 0xC + (data->port - 24) / 8;
++        cpld_bit = 1 << (data->port % 8);
++    }
++
++    cpld_val = as5712_54x_i2c_cpld_read(cpld_addr, cpld_reg);
 +
 +    /* Update tx_disable status */
 +    if (disable) {
 +        data->status[SFP_TX_DISABLE] |= BIT_INDEX(data->port);
++        cpld_val |= cpld_bit;
 +    }
 +    else {
-+        data->status[SFP_TX_DISABLE] &= BIT_INDEX(data->port);
++        data->status[SFP_TX_DISABLE] &= ~BIT_INDEX(data->port);
++        cpld_val &= ~cpld_bit;
 +    }
 +
-+    cpld_val |= data->status[SFP_TX_DISABLE] >> (8*(data->port/8));
 +    as5712_54x_i2c_cpld_write(cpld_addr, cpld_reg, cpld_val);
 +
 +    mutex_unlock(&data->update_lock);
@@ -2220,7 +2232,7 @@ index 0000000..54d885e
 +    struct as5712_54x_sfp_data *data;
 +    int status;
 +
-+    extern int platform_accton_as5712_54x(void); 
++    extern int platform_accton_as5712_54x(void);
 +    if(!platform_accton_as5712_54x()) {
 +        return -ENODEV;
 +    }
