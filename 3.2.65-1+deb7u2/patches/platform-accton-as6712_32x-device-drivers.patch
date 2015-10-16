@@ -55,7 +55,7 @@ new file mode 100644
 index 0000000..9c7cac7
 --- /dev/null
 +++ b/drivers/hwmon/accton_as6712_32x_fan.c
-@@ -0,0 +1,430 @@
+@@ -0,0 +1,434 @@
 +/*
 + * A hwmon driver for the Accton as6712 32x fan contrl
 + *
@@ -99,27 +99,27 @@ index 0000000..9c7cac7
 +
 +#define CPLD_REG_FAN_STATUS_OFFSET        0xC
 +#define CPLD_REG_FANR_STATUS_OFFSET       0x17
-+//#define CPLD_REG_FAN_DIRECTION_OFFSET     0xC /* unused */
++#define CPLD_REG_FAN_DIRECTION_OFFSET     0x1E
 +
-+#define CPLD_FAN1_REG_SPEED_OFFSET       0x14
-+#define CPLD_FAN2_REG_SPEED_OFFSET       0x13
++#define CPLD_FAN1_REG_SPEED_OFFSET       0x10
++#define CPLD_FAN2_REG_SPEED_OFFSET       0x11
 +#define CPLD_FAN3_REG_SPEED_OFFSET       0x12
-+#define CPLD_FAN4_REG_SPEED_OFFSET       0x11
-+#define CPLD_FAN5_REG_SPEED_OFFSET       0x10
++#define CPLD_FAN4_REG_SPEED_OFFSET       0x13
++#define CPLD_FAN5_REG_SPEED_OFFSET       0x14
 +
-+#define CPLD_FANR1_REG_SPEED_OFFSET      0x1C
-+#define CPLD_FANR2_REG_SPEED_OFFSET      0x1B
++#define CPLD_FANR1_REG_SPEED_OFFSET      0x18
++#define CPLD_FANR2_REG_SPEED_OFFSET      0x19
 +#define CPLD_FANR3_REG_SPEED_OFFSET      0x1A
-+#define CPLD_FANR4_REG_SPEED_OFFSET      0x19
-+#define CPLD_FANR5_REG_SPEED_OFFSET      0x18
++#define CPLD_FANR4_REG_SPEED_OFFSET      0x1B
++#define CPLD_FANR5_REG_SPEED_OFFSET      0x1C
 +
 +#define CPLD_REG_FAN_PWM_CYCLE_OFFSET      0xD
 +
-+#define CPLD_FAN1_INFO_BIT_MASK           0x10
-+#define CPLD_FAN2_INFO_BIT_MASK           0x8
++#define CPLD_FAN1_INFO_BIT_MASK           0x1
++#define CPLD_FAN2_INFO_BIT_MASK           0x2
 +#define CPLD_FAN3_INFO_BIT_MASK           0x4
-+#define CPLD_FAN4_INFO_BIT_MASK           0x2
-+#define CPLD_FAN5_INFO_BIT_MASK           0x1
++#define CPLD_FAN4_INFO_BIT_MASK           0x8
++#define CPLD_FAN5_INFO_BIT_MASK           0x10
 +
 +#define PROJECT_NAME                      
 +
@@ -141,7 +141,7 @@ index 0000000..9c7cac7
 +    unsigned long    last_updated;    /* In jiffies */
 +    u8               status[FAN_MAX_NUMBER];     /* inner first fan status */
 +    u32              speed[FAN_MAX_NUMBER];      /* inner first fan speed */
-+    //u8               direction[FAN_MAX_NUMBER];  /* reconrd the direction of inner first and second fans */
++    u8               direction[FAN_MAX_NUMBER];  /* reconrd the direction of inner first and second fans */
 +    u32              duty_cycle[FAN_MAX_NUMBER]; /* control the speed of inner first and second fans */
 +    u8               r_status[FAN_MAX_NUMBER];   /* inner second fan status */
 +    u32              r_speed[FAN_MAX_NUMBER];    /* inner second fan speed */
@@ -174,6 +174,7 @@ index 0000000..9c7cac7
 +    FAN##id##_FAULT,      \
 +    FAN##id##_SPEED,      \
 +    FAN##id##_DUTY_CYCLE, \
++    FAN##id##_DIRECTION, \
 +    FANR##id##_FAULT,    \
 +    FANR##id##_SPEED,
 +    
@@ -204,6 +205,7 @@ index 0000000..9c7cac7
 +    static SENSOR_DEVICE_ATTR(prj##fan##id##_speed_rpm, S_IRUGO, fan_show_value, NULL, FAN##id##_SPEED); \
 +    static SENSOR_DEVICE_ATTR(prj##fan##id##_duty_cycle_percentage, S_IWUSR | S_IRUGO, fan_show_value,          \
 +                                            fan_set_duty_cycle, FAN##id##_DUTY_CYCLE);          \
++    static SENSOR_DEVICE_ATTR(prj##fan##id##_direction, S_IRUGO, fan_show_value, NULL, FAN##id##_DIRECTION); \
 +    static SENSOR_DEVICE_ATTR(prj##fanr##id##_fault, S_IRUGO, fan_show_value, NULL, FANR##id##_FAULT); \
 +    static SENSOR_DEVICE_ATTR(prj##fanr##id##_speed_rpm, S_IRUGO, fan_show_value, NULL, FANR##id##_SPEED); 
 +
@@ -220,6 +222,7 @@ index 0000000..9c7cac7
 +    &sensor_dev_attr_##prj##fan##id##_fault.dev_attr.attr,     \
 +    &sensor_dev_attr_##prj##fan##id##_speed_rpm.dev_attr.attr,     \
 +    &sensor_dev_attr_##prj##fan##id##_duty_cycle_percentage.dev_attr.attr,\
++    &sensor_dev_attr_##prj##fan##id##_direction.dev_attr.attr, \
 +    &sensor_dev_attr_##prj##fanr##id##_fault.dev_attr.attr,   \
 +    &sensor_dev_attr_##prj##fanr##id##_speed_rpm.dev_attr.attr,  
 +
@@ -267,10 +270,10 @@ index 0000000..9c7cac7
 +            ret = sprintf(buf, "%d\n", fan_data->duty_cycle[data_index]);
 +            DEBUG_PRINT("[Check !!][%s][%d][type->index=%d][data->index=%d]\n", __FUNCTION__, __LINE__, type_index, data_index);  
 +            break;
-+        //case FAN1_DIRECTION:
-+        //    ret = sprintf(buf, "%d\n", fan_data->direction[data_index]);   /* presnet, need to modify*/
-+        //    DEBUG_PRINT("[Check !!][%s][%d][type->index=%d][data->index=%d]\n", __FUNCTION__, __LINE__, type_index, data_index);  
-+        //    break;  
++        case FAN1_DIRECTION:
++            ret = sprintf(buf, "%d\n", fan_data->direction[data_index]);   /* presnet, need to modify*/
++            DEBUG_PRINT("[Check !!][%s][%d][type->index=%d][data->index=%d]\n", __FUNCTION__, __LINE__, type_index, data_index);  
++            break;  
 +        case FANR1_FAULT:
 +            ret = sprintf(buf, "%d\n", fan_data->r_status[data_index]);
 +            DEBUG_PRINT("[Check !!][%s][%d][type->index=%d][data->index=%d]\n", __FUNCTION__, __LINE__, type_index, data_index);  
@@ -322,7 +325,7 @@ index 0000000..9c7cac7
 +
 +static void accton_as6712_32x_fan_update_device(struct device *dev)
 +{
-+    int speed, r_speed, fault, r_fault, ctrl_speed;
++    int speed, r_speed, fault, r_fault, direction, ctrl_speed;
 +    int i;
 +    
 +    mutex_lock(&fan_data->update_lock);
@@ -340,7 +343,7 @@ index 0000000..9c7cac7
 +
 +    fault      = accton_as6712_32x_fan_read_value(CPLD_REG_FAN_STATUS_OFFSET);
 +    r_fault    = accton_as6712_32x_fan_read_value(CPLD_REG_FANR_STATUS_OFFSET);    
-+    //direction  = accton_as6712_32x_fan_read_value(CPLD_REG_FAN_DIRECTION_OFFSET);
++    direction  = accton_as6712_32x_fan_read_value(CPLD_REG_FAN_DIRECTION_OFFSET);
 +    ctrl_speed = accton_as6712_32x_fan_read_value(CPLD_REG_FAN_PWM_CYCLE_OFFSET);
 +    
 +    if ( (fault < 0) || (r_fault < 0) || (ctrl_speed < 0) )
@@ -360,10 +363,11 @@ index 0000000..9c7cac7
 +         * 0: normal, 1:abnormal
 +         * Each FAN-tray module has two fans.
 +         */
-+        fan_data->status[i]     = (fault     & fan_info_mask[i]) >> (FAN_MAX_NUMBER-i-1);
++        fan_data->status[i]     = (fault     & fan_info_mask[i]) >> i;
 +        DEBUG_PRINT("[fan%d:] fail=%d \n",i, fan_data->status[i]);    
 +        
-+        fan_data->r_status[i]   = (r_fault   & fan_info_mask[i]) >> (FAN_MAX_NUMBER-i-1);
++        fan_data->r_status[i]   = (r_fault   & fan_info_mask[i]) >> i;
++        fan_data->direction[i]  = (direction & fan_info_mask[i]) >> i;
 +        fan_data->duty_cycle[i] = ctrl_speed * FAN_SPEED_PRECENT_TO_CPLD_STEP;
 +        
 +        /* fan speed 
