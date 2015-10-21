@@ -837,7 +837,7 @@ new file mode 100644
 index 0000000..2ec0a59
 --- /dev/null
 +++ b/drivers/i2c/muxes/i2c-mux-accton_as6712_32x_cpld.c
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,420 @@
 +/*
 + * I2C multiplexer
 + *
@@ -886,9 +886,11 @@ index 0000000..2ec0a59
 +
 +int platform_accton_as6712_32x(void)
 +{
-+    dmi_check_system(as6712_dmi_table);
++    return dmi_check_system(as6712_dmi_table);
 +}
++EXPORT_SYMBOL(platform_accton_as6712_32x);
 +
++#define NUM_OF_CPLD1_CHANS 0x0
 +#define NUM_OF_CPLD2_CHANS 0x10
 +#define NUM_OF_CPLD3_CHANS 0x10
 +#define NUM_OF_ALL_CPLD_CHANS (NUM_OF_CPLD2_CHANS + NUM_OF_CPLD3_CHANS)
@@ -921,6 +923,10 @@ index 0000000..2ec0a59
 +
 +/* Provide specs for the PCA954x types we know about */
 +static const struct chip_desc chips[] = {
++    [as6712_32x_cpld1] = {
++    .nchans        = NUM_OF_CPLD1_CHANS,
++    .deselectChan  = NUM_OF_CPLD1_CHANS,
++    },
 +    [as6712_32x_cpld2] = {
 +    .nchans        = NUM_OF_CPLD2_CHANS,
 +    .deselectChan  = NUM_OF_CPLD2_CHANS,
@@ -1069,6 +1075,20 @@ index 0000000..2ec0a59
 +	mutex_unlock(&list_lock);
 +}
 +
++static ssize_t show_cpld_version(struct device *dev, struct device_attribute *attr, char *buf)
++{
++    u8 reg = 0x1;
++    struct i2c_client *client;
++    int len;
++
++    client = to_i2c_client(dev);
++    len = sprintf(buf, "%d", i2c_smbus_read_byte_data(client, reg));
++
++    return len;
++}	
++
++static struct device_attribute ver = __ATTR(version, 0600, show_cpld_version, NULL);
++
 +/*
 + * I2C init/probing/exit functions
 + */
@@ -1076,7 +1096,7 @@ index 0000000..2ec0a59
 +			 const struct i2c_device_id *id)
 +{
 +	struct i2c_adapter *adap = to_i2c_adapter(client->dev.parent);
-+	int chan;
++	int chan=0;
 +	struct accton_i2c_cpld_mux *data;
 +	int ret = -ENODEV;
 +
@@ -1125,6 +1145,10 @@ index 0000000..2ec0a59
 +
 +    accton_i2c_cpld_add_client(client);
 +
++    ret = sysfs_create_file(&client->dev.kobj, &ver.attr);
++    if (ret)
++         goto virt_reg_failed;
++
 +    return 0;
 +
 +virt_reg_failed:
@@ -1141,6 +1165,8 @@ index 0000000..2ec0a59
 +    struct accton_i2c_cpld_mux *data = i2c_get_clientdata(client);
 +    const struct chip_desc *chip = &chips[data->type];
 +    int chan;
++
++    sysfs_remove_file(&client->dev.kobj, &ver.attr);
 +
 +    for (chan = 0; chan < chip->nchans; ++chan) {
 +        if (data->virt_adaps[chan]) {
