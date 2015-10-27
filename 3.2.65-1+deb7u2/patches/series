@@ -238,4 +238,5 @@ driver-hwmon-cpr-4011-4mxx.patch
 platform-accton-as5712_54x-device-drivers.patch
 platform-accton-as6712_32x-device-drivers.patch
 overlayfs_notify.patch
+platform-accton-as7512_32x-device-drivers.patch
 driver-pca954x-i2c-mux-deselect-on-exit-config-option.patch
