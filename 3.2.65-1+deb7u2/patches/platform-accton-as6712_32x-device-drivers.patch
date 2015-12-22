@@ -753,9 +753,9 @@ index 0000000..ef9fadf
 +                model_name_len = 13;
 +            }
 +            else { /* 0x50 & 0x53 */
-+                /* ym2651 AC power */
-+                command = 0x20;
-+                model_name_len = 8;
++                /* um400d01x DC power */
++                command = 0x50;
++                model_name_len = 13;
 +            }
 +
 +            status = as6712_32x_psu_read_block(client,command,data->model_name,
