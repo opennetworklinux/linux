@@ -867,6 +867,9 @@ index 0000000..d668ca4
 +#include <linux/i2c-mux.h>
 +#include <linux/dmi.h>
 +
++static int force=0;
++module_param(force, int, 0);
++
 +static struct dmi_system_id as6812_dmi_table[] = {
 +	{
 +		.ident = "Accton AS6812",
@@ -879,7 +882,7 @@ index 0000000..d668ca4
 +
 +int platform_accton_as6812_32x(void)
 +{
-+	return dmi_check_system(as6812_dmi_table);
++	return force || dmi_check_system(as6812_dmi_table);
 +}
 +EXPORT_SYMBOL(platform_accton_as6812_32x);
 +
