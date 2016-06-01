@@ -245,3 +245,4 @@ platform-accton-as5812_54x-device-drivers.patch
 platform-accton-as6812_32x-device-drivers.patch
 platform-accton-as5812_54t-device-drivers.patch
 platform-accton-as7716_32x-device-drivers.patch
+arch-intel-reboot-cf9-cold.patch
